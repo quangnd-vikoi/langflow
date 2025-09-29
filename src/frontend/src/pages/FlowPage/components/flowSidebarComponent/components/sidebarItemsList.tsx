@@ -8,14 +8,19 @@ import { getDisabledTooltip } from "../helpers/get-disabled-tooltip";
 import type { UniqueInputsComponents } from "../types";
 import SidebarDraggableComponent from "./sidebarDraggableComponent";
 
-const SidebarItemsList = ({ item, dataFilter, nodeColors, onDragStart, sensitiveSort }) => {
-	return (
-		<div className="flex flex-col gap-1 py-2">
-			{Object.keys(dataFilter[item.name])
-				.sort((a, b) => {
-					const itemA = dataFilter[item.name][a];
-					const itemB = dataFilter[item.name][b];
-
+const SidebarItemsList = ({
+  item,
+  dataFilter,
+  nodeColors,
+  onDragStart,
+  sensitiveSort,
+}) => {
+  return (
+    <div className="flex flex-col gap-1 py-1">
+      {Object.keys(dataFilter[item.name])
+        .sort((a, b) => {
+          const itemA = dataFilter[item.name][a];
+          const itemB = dataFilter[item.name][b];
 					// Sort by priority if available
 					if (itemA.priority !== undefined || itemB.priority !== undefined) {
 						const priorityA = itemA.priority ?? Number.MAX_SAFE_INTEGER;

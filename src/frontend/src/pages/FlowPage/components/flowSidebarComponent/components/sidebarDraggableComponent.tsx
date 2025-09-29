@@ -14,42 +14,45 @@ import { createFlowComponent, downloadNode, getNodeId } from "@/utils/reactflowU
 import { cn, removeCountFromString } from "@/utils/utils";
 
 export const SidebarDraggableComponent = forwardRef(
-	(
-		{
-			sectionName,
-			display_name,
-			icon,
-			itemName,
-			error,
-			color,
-			onDragStart,
-			apiClass,
-			official,
-			beta,
-			legacy,
-			disabled,
-			disabledTooltip,
-		}: {
-			sectionName: string;
-			apiClass: APIClassType;
-			icon: string;
-			display_name: string;
-			itemName: string;
-			error: boolean;
-			color: string;
-			onDragStart: DragEventHandler<HTMLDivElement>;
-			official: boolean;
-			beta: boolean;
-			legacy: boolean;
-			disabled?: boolean;
-			disabledTooltip?: string;
-		},
-		ref
-	) => {
-		const [open, setOpen] = useState(false);
-		const { deleteFlow } = useDeleteFlow();
-		const flows = useFlowsManagerStore((state) => state.flows);
-		const addComponent = useAddComponent();
+  (
+    {
+      sectionName,
+      display_name,
+      icon,
+      itemName,
+      error,
+      color,
+      onDragStart,
+      apiClass,
+      official,
+      onDelete,
+      beta,
+      legacy,
+      disabled,
+      disabledTooltip,
+    }: {
+      sectionName: string;
+      apiClass: APIClassType;
+      icon: string;
+      display_name: string;
+      itemName: string;
+      error: boolean;
+      color: string;
+      onDragStart: DragEventHandler<HTMLDivElement>;
+      official: boolean;
+      onDelete?: () => void;
+      beta: boolean;
+      legacy: boolean;
+      disabled?: boolean;
+      disabledTooltip?: string;
+    },
+    ref,
+  ) => {
+    const [open, setOpen] = useState(false);
+    const { deleteFlow } = useDeleteFlow();
+    const flows = useFlowsManagerStore((state) => state.flows);
+    const addComponent = useAddComponent();
+
 
 		const version = useDarkStore((state) => state.version);
 		const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -65,20 +68,29 @@ export const SidebarDraggableComponent = forwardRef(
 			}
 		};
 
-		function handleSelectChange(value: string) {
-			switch (value) {
-				case "download": {
-					const type = removeCountFromString(itemName);
-					downloadNode(createFlowComponent({ id: getNodeId(type), type, node: apiClass }, version));
-					break;
-				}
-				case "delete": {
-					const flowId = flows?.find((f) => f.name === display_name);
-					if (flowId) deleteFlow({ id: flowId.id });
-					break;
-				}
-			}
-		}
+    function handleSelectChange(value: string) {
+      switch (value) {
+        case "download": {
+          const type = removeCountFromString(itemName);
+          downloadNode(
+            createFlowComponent(
+              { id: getNodeId(type), type, node: apiClass },
+              version,
+            ),
+          );
+          break;
+        }
+        case "delete": {
+          if (onDelete) {
+            onDelete();
+            break;
+          }
+          const flowId = flows?.find((f) => f.name === display_name);
+          if (flowId) deleteFlow({ id: flowId.id });
+          break;
+        }
+      }
+    }
 
 		const handleKeyDown = (e) => {
 			if (e.key === "Enter" || e.key === " ") {
@@ -87,130 +99,158 @@ export const SidebarDraggableComponent = forwardRef(
 				addComponent(apiClass, itemName);
 			}
 		};
-
-		return (
-			<Select
-				onValueChange={handleSelectChange}
-				onOpenChange={(change) => setOpen(change)}
-				open={open}
-				key={itemName}
-			>
-				{/* <ShadTooltip content={disabled ? disabledTooltip : null} styleClasses="z-50"> */}
-				<ShadTooltip content={display_name} styleClasses="z-50">
-					<div
-						onPointerDown={handlePointerDown}
-						onContextMenuCapture={(e) => {
-							e.preventDefault();
-							setOpen(true);
-						}}
-						key={itemName}
-						data-tooltip-id={itemName}
-						tabIndex={0}
-						onKeyDown={handleKeyDown}
-						className="m-[1px] rounded-md outline-none ring-ring focus-visible:ring-1"
-						data-testid={`${sectionName.toLowerCase()}_${display_name.toLowerCase()}_draggable`}
-					>
-						<div
-							data-testid={sectionName + display_name}
-							id={sectionName + display_name}
-							className={cn(
-								"group/draggable flex cursor-grab items-center gap-2 rounded-md bg-muted p-3 hover:bg-secondary-hover/75",
-								error && "cursor-not-allowed select-none",
-								disabled
-									? "pointer-events-none bg-accent text-placeholder-foreground"
-									: "bg-muted text-foreground"
-							)}
-							draggable={!error}
-							style={{
-								borderLeftColor: color,
-							}}
-							onDragStart={onDragStart}
-							onDragEnd={() => {
-								if (document.getElementsByClassName("cursor-grabbing").length > 0) {
-									document.body.removeChild(
-										document.getElementsByClassName("cursor-grabbing")[0]
-									);
-								}
-							}}
-						>
-							<ForwardedIconComponent name={icon} className="h-5 w-5 shrink-0" />
-							<div className="flex flex-1 items-center overflow-hidden">
-								<span data-testid="display-name" className="truncate text-sm font-normal">
-									{display_name}
-								</span>
-								{/* </ShadTooltip> */}
-								{beta && (
-									<Badge variant="pinkStatic" size="xq" className="ml-1.5 shrink-0">
-										Beta
-									</Badge>
-								)}
-								{legacy && (
-									<Badge variant="secondaryStatic" size="xq" className="ml-1.5 shrink-0">
-										Legacy
-									</Badge>
-								)}
-							</div>
-							<div className="flex shrink-0 items-center gap-1">
-								{!disabled && (
-									<Button
-										data-testid={`add-component-button-${convertTestName(display_name)}`}
-										variant="ghost"
-										size="icon"
-										tabIndex={-1}
-										className="text-primary"
-										onClick={() => addComponent(apiClass, itemName)}
-									>
-										<ForwardedIconComponent
-											name="Plus"
-											className="h-4 w-4 shrink-0 transition-all group-hover/draggable:opacity-100 group-focus/draggable:opacity-100 sm:opacity-0"
-										/>
-									</Button>
-								)}
-								<div ref={popoverRef}>
-									<ForwardedIconComponent
-										name="GripVertical"
-										className="h-4 w-4 shrink-0 text-muted-foreground group-hover/draggable:text-primary"
-									/>
-									<SelectTrigger tabIndex={-1}></SelectTrigger>
-									<SelectContent
-										position="popper"
-										side="bottom"
-										sideOffset={-25}
-										style={{
-											position: "absolute",
-											left: cursorPos.x,
-											top: cursorPos.y,
-										}}
-									>
-										<SelectItem value={"download"}>
-											<div className="flex">
-												<IconComponent
-													name="Download"
-													className="relative top-0.5 mr-2 h-4 w-4"
-												/>{" "}
-												Download{" "}
-											</div>{" "}
-										</SelectItem>
-										{!official && (
-											<SelectItem value={"delete"}>
-												<div className="flex">
-													<IconComponent
-														name="Trash2"
-														className="relative top-0.5 mr-2 h-4 w-4"
-													/>{" "}
-													Delete{" "}
-												</div>{" "}
-											</SelectItem>
-										)}
-									</SelectContent>
-								</div>
-							</div>
-						</div>
-					</div>
-				</ShadTooltip>
-			</Select>
-		);
-	}
+    return (
+      <Select
+        onValueChange={handleSelectChange}
+        onOpenChange={(change) => setOpen(change)}
+        open={open}
+        key={itemName}
+      >
+        <ShadTooltip
+          content={disabled ? disabledTooltip : null}
+          styleClasses="z-50"
+        >
+          <div
+            onPointerDown={handlePointerDown}
+            onContextMenuCapture={(e) => {
+              e.preventDefault();
+              setOpen(true);
+            }}
+            key={itemName}
+            data-tooltip-id={itemName}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            className="rounded-md outline-none ring-ring focus-visible:ring-1"
+            data-testid={`${sectionName.toLowerCase()}_${display_name.toLowerCase()}_draggable`}
+          >
+            <div
+              data-testid={sectionName + display_name}
+              id={sectionName + display_name}
+              className={cn(
+                "group/draggable flex cursor-grab items-center gap-2 rounded-md bg-muted p-1 px-2 hover:bg-secondary-hover/75",
+                error && "cursor-not-allowed select-none",
+                disabled
+                  ? "pointer-events-none bg-accent text-placeholder-foreground h-8"
+                  : "bg-muted text-foreground",
+              )}
+              draggable={!error}
+              style={{
+                borderLeftColor: color,
+              }}
+              onDragStart={onDragStart}
+              onDoubleClick={() => {
+                if (!disabled) {
+                  addComponent(apiClass, itemName);
+                }
+              }}
+              onDragEnd={() => {
+                if (
+                  document.getElementsByClassName("cursor-grabbing").length > 0
+                ) {
+                  document.body.removeChild(
+                    document.getElementsByClassName("cursor-grabbing")[0],
+                  );
+                }
+              }}
+            >
+              <ForwardedIconComponent
+                name={icon}
+                className="h-[18px] w-[18px] shrink-0"
+              />
+              <div className="flex flex-1 items-center overflow-hidden">
+                <ShadTooltip content={display_name} styleClasses="z-50">
+                  <span
+                    data-testid="display-name"
+                    className="truncate text-sm font-normal"
+                  >
+                    {display_name}
+                  </span>
+                </ShadTooltip>
+                {beta && (
+                  <Badge
+                    variant="pinkStatic"
+                    size="xq"
+                    className="ml-1.5 shrink-0"
+                  >
+                    Beta
+                  </Badge>
+                )}
+                {legacy && (
+                  <Badge
+                    variant="secondaryStatic"
+                    size="xq"
+                    className="ml-1.5 shrink-0"
+                  >
+                    Legacy
+                  </Badge>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                {!disabled && (
+                  <Button
+                    data-testid={`add-component-button-${convertTestName(
+                      display_name,
+                    )}`}
+                    variant="ghost"
+                    size="icon"
+                    tabIndex={-1}
+                    className="text-primary"
+                    onClick={() => addComponent(apiClass, itemName)}
+                  >
+                    <ForwardedIconComponent
+                      name="Plus"
+                      className="h-4 w-4 shrink-0 transition-all group-hover/draggable:opacity-100 group-focus/draggable:opacity-100 sm:opacity-0"
+                    />
+                  </Button>
+                )}
+                <div ref={popoverRef}>
+                  <ForwardedIconComponent
+                    name="GripVertical"
+                    className="h-4 w-4 shrink-0 text-muted-foreground group-hover/draggable:text-primary"
+                  />
+                  <SelectTrigger tabIndex={-1}></SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    sideOffset={-25}
+                    style={{
+                      position: "absolute",
+                      left: cursorPos.x,
+                      top: cursorPos.y,
+                    }}
+                  >
+                    <SelectItem value={"download"}>
+                      <div className="flex">
+                        <IconComponent
+                          name="Download"
+                          className="relative top-0.5 mr-2 h-4 w-4"
+                        />{" "}
+                        Download{" "}
+                      </div>{" "}
+                    </SelectItem>
+                    {(!official || onDelete) && (
+                      <SelectItem
+                        value={"delete"}
+                        data-testid="draggable-component-menu-delete"
+                      >
+                        <div className="flex">
+                          <IconComponent
+                            name="Trash2"
+                            className="relative top-0.5 mr-2 h-4 w-4"
+                          />{" "}
+                          Delete{" "}
+                        </div>{" "}
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ShadTooltip>
+      </Select>
+    );
+  },
 );
 
 export default SidebarDraggableComponent;
