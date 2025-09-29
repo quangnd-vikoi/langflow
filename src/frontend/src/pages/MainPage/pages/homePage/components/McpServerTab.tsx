@@ -30,121 +30,113 @@ import { parseString, toSpaceCase } from "@/utils/stringManipulation";
 import { cn, getOS } from "@/utils/utils";
 
 interface MemoizedApiKeyButtonProps {
-  apiKey: string;
-  isGeneratingApiKey: boolean;
-  generateApiKey: () => void;
+	apiKey: string;
+	isGeneratingApiKey: boolean;
+	generateApiKey: () => void;
 }
 
 const MemoizedApiKeyButton = memo(
-  ({
-    apiKey,
-    isGeneratingApiKey,
-    generateApiKey,
-  }: MemoizedApiKeyButtonProps) => (
-    <Button
-      unstyled
-      className="flex items-center gap-2 font-sans text-muted-foreground hover:text-foreground"
-      disabled={apiKey !== ""}
-      loading={isGeneratingApiKey}
-      onClick={generateApiKey}
-    >
-      <ForwardedIconComponent
-        name={"key"}
-        className="h-4 w-4"
-        aria-hidden="true"
-      />
-      <span>{apiKey === "" ? "Generate API key" : "API key generated"}</span>
-    </Button>
-  ),
+	({ apiKey, isGeneratingApiKey, generateApiKey }: MemoizedApiKeyButtonProps) => (
+		<Button
+			unstyled
+			className="flex items-center gap-2 font-sans text-muted-foreground hover:text-foreground"
+			disabled={apiKey !== ""}
+			loading={isGeneratingApiKey}
+			onClick={generateApiKey}
+		>
+			<ForwardedIconComponent name={"key"} className="h-4 w-4" aria-hidden="true" />
+			<span>{apiKey === "" ? "Generate API key" : "API key generated"}</span>
+		</Button>
+	)
 );
 MemoizedApiKeyButton.displayName = "MemoizedApiKeyButton";
 
 // Define interface for MemoizedCodeTag props
 interface MemoizedCodeTagProps {
-  children: ReactNode;
-  isCopied: boolean;
-  copyToClipboard: () => void;
-  isAuthApiKey: boolean | null;
-  apiKey: string;
-  isGeneratingApiKey: boolean;
-  generateApiKey: () => void;
+	children: ReactNode;
+	isCopied: boolean;
+	copyToClipboard: () => void;
+	isAuthApiKey: boolean | null;
+	apiKey: string;
+	isGeneratingApiKey: boolean;
+	generateApiKey: () => void;
 }
 
 // Memoized CodeTag to prevent re-renders when parent components re-render
 const MemoizedCodeTag = memo(
-  ({
-    children,
-    isCopied,
-    copyToClipboard,
-    isAuthApiKey,
-    apiKey,
-    isGeneratingApiKey,
-    generateApiKey,
-  }: MemoizedCodeTagProps) => (
-    <div className="relative bg-background text-[13px]">
-      <div className="absolute right-4 top-4 flex items-center gap-6">
-        {isAuthApiKey && (
-          <MemoizedApiKeyButton
-            apiKey={apiKey}
-            isGeneratingApiKey={isGeneratingApiKey}
-            generateApiKey={generateApiKey}
-          />
-        )}
-        <Button
-          unstyled
-          size="icon"
-          className={cn("h-4 w-4 text-muted-foreground hover:text-foreground")}
-          onClick={copyToClipboard}
-        >
-          <ForwardedIconComponent
-            name={isCopied ? "check" : "copy"}
-            className="h-4 w-4"
-            aria-hidden="true"
-          />
-        </Button>
-      </div>
-      <div className="overflow-x-auto p-4">
-        <span>{children}</span>
-      </div>
-    </div>
-  ),
+	({
+		children,
+		isCopied,
+		copyToClipboard,
+		isAuthApiKey,
+		apiKey,
+		isGeneratingApiKey,
+		generateApiKey,
+	}: MemoizedCodeTagProps) => (
+		<div className="relative bg-background text-[13px]">
+			<div className="absolute right-4 top-4 flex items-center gap-6">
+				{isAuthApiKey && (
+					<MemoizedApiKeyButton
+						apiKey={apiKey}
+						isGeneratingApiKey={isGeneratingApiKey}
+						generateApiKey={generateApiKey}
+					/>
+				)}
+				<Button
+					unstyled
+					size="icon"
+					className={cn("h-4 w-4 text-muted-foreground hover:text-foreground")}
+					onClick={copyToClipboard}
+				>
+					<ForwardedIconComponent
+						name={isCopied ? "check" : "copy"}
+						className="h-4 w-4"
+						aria-hidden="true"
+					/>
+				</Button>
+			</div>
+			<div className="overflow-x-auto p-4">
+				<span>{children}</span>
+			</div>
+		</div>
+	)
 );
 MemoizedCodeTag.displayName = "MemoizedCodeTag";
 
 const autoInstallers = [
-  {
-    name: "cursor",
-    title: "Cursor",
-    icon: "Cursor",
-  },
-  {
-    name: "claude",
-    title: "Claude",
-    icon: "Claude",
-  },
-  {
-    name: "windsurf",
-    title: "Windsurf",
-    icon: "Windsurf",
-  },
+	{
+		name: "cursor",
+		title: "Cursor",
+		icon: "Cursor",
+	},
+	{
+		name: "claude",
+		title: "Claude",
+		icon: "Claude",
+	},
+	{
+		name: "windsurf",
+		title: "Windsurf",
+		icon: "Windsurf",
+	},
 ];
 
 const operatingSystemTabs = [
-  {
-    name: "macoslinux",
-    title: "macOS/Linux",
-    icon: "FaApple",
-  },
-  {
-    name: "windows",
-    title: "Windows",
-    icon: "FaWindows",
-  },
-  {
-    name: "wsl",
-    title: "WSL",
-    icon: "FaLinux",
-  },
+	{
+		name: "macoslinux",
+		title: "macOS/Linux",
+		icon: "FaApple",
+	},
+	{
+		name: "windows",
+		title: "Windows",
+		icon: "FaWindows",
+	},
+	{
+		name: "wsl",
+		title: "WSL",
+		icon: "FaLinux",
+	},
 ];
 
 const McpServerTab = ({ folderName }: { folderName: string }) => {
@@ -290,44 +282,37 @@ const McpServerTab = ({ folderName }: { folderName: string }) => {
         "--headers",
         "x-api-key",
         "${apiKey || "YOUR_API_KEY"}",`;
-    }
+		}
 
-    if (!currentAuthSettings || currentAuthSettings.auth_type === "none") {
-      return "";
-    }
+		if (!currentAuthSettings || currentAuthSettings.auth_type === "none") {
+			return "";
+		}
 
-    if (currentAuthSettings.auth_type === "apikey") {
-      return `
+		if (currentAuthSettings.auth_type === "apikey") {
+			return `
         "--headers",
         "x-api-key",
         "${apiKey || "YOUR_API_KEY"}",`;
-    }
+		}
 
-    return "";
-  };
+		return "";
+	};
 
-  const MCP_SERVER_JSON = `{
+	const MCP_SERVER_JSON = `{
   "mcpServers": {
-    "lf-${parseString(folderName ?? "project", [
-      "snake_case",
-      "no_blank",
-      "lowercase",
-    ]).slice(0, MAX_MCP_SERVER_NAME_LENGTH - 4)}": {
-      "command": "${
-        selectedPlatform === "windows"
-          ? "cmd"
-          : selectedPlatform === "wsl"
-            ? "wsl"
-            : "uvx"
-      }",
+    "lf-${parseString(folderName ?? "project", ["snake_case", "no_blank", "lowercase"]).slice(
+		0,
+		MAX_MCP_SERVER_NAME_LENGTH - 4
+	)}": {
+      "command": "${selectedPlatform === "windows" ? "cmd" : selectedPlatform === "wsl" ? "wsl" : "uvx"}",
       "args": [
         ${
-          selectedPlatform === `windows`
-            ? `"/c",
+			selectedPlatform === `windows`
+				? `"/c",
         "uvx",
         `
-            : selectedPlatform === "wsl"
-              ? `"uvx",
+				: selectedPlatform === "wsl"
+				? `"uvx",
         `
               : ""
         }${

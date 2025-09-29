@@ -1,27 +1,16 @@
 import { type DragEventHandler, forwardRef, useRef, useState } from "react";
-import IconComponent, {
-  ForwardedIconComponent,
-} from "@/components/common/genericIconComponent";
+import IconComponent, { ForwardedIconComponent } from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import { convertTestName } from "@/components/common/storeCardComponent/utils/convert-test-name";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select-custom";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select-custom";
 import useDeleteFlow from "@/hooks/flows/use-delete-flow";
 import { useAddComponent } from "@/hooks/use-add-component";
 import { useDarkStore } from "@/stores/darkStore";
 import useFlowsManagerStore from "@/stores/flowsManagerStore";
 import type { APIClassType } from "@/types/api";
-import {
-  createFlowComponent,
-  downloadNode,
-  getNodeId,
-} from "@/utils/reactflowUtils";
+import { createFlowComponent, downloadNode, getNodeId } from "@/utils/reactflowUtils";
 import { cn, removeCountFromString } from "@/utils/utils";
 
 export const SidebarDraggableComponent = forwardRef(
@@ -64,19 +53,20 @@ export const SidebarDraggableComponent = forwardRef(
     const flows = useFlowsManagerStore((state) => state.flows);
     const addComponent = useAddComponent();
 
-    const version = useDarkStore((state) => state.version);
-    const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-    const popoverRef = useRef<HTMLDivElement>(null);
 
-    const handlePointerDown = (e) => {
-      if (!open) {
-        const rect = popoverRef.current?.getBoundingClientRect() ?? {
-          left: 0,
-          top: 0,
-        };
-        setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-      }
-    };
+		const version = useDarkStore((state) => state.version);
+		const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+		const popoverRef = useRef<HTMLDivElement>(null);
+
+		const handlePointerDown = (e) => {
+			if (!open) {
+				const rect = popoverRef.current?.getBoundingClientRect() ?? {
+					left: 0,
+					top: 0,
+				};
+				setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+			}
+		};
 
     function handleSelectChange(value: string) {
       switch (value) {
@@ -102,14 +92,13 @@ export const SidebarDraggableComponent = forwardRef(
       }
     }
 
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        e.stopPropagation();
-        addComponent(apiClass, itemName);
-      }
-    };
-
+		const handleKeyDown = (e) => {
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				e.stopPropagation();
+				addComponent(apiClass, itemName);
+			}
+		};
     return (
       <Select
         onValueChange={handleSelectChange}

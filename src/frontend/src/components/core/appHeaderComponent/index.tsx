@@ -94,7 +94,7 @@ export default function AppHeader(): JSX.Element {
             unstyled
             className="hidden items-center whitespace-nowrap pr-2 lg:inline"
           >
-            <CustomLangflowCounts />
+            {/* <CustomLangflowCounts /> */}
           </Button>
         </>
         <AlertDropdown
